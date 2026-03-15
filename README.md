@@ -1,3 +1,13 @@
+---
+title: RAG PDF Chatbot
+emoji: 📄
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 # RAG PDF Chatbot
 
 A conversational AI app that lets you upload PDF documents and ask questions about them in natural language. Built with LangChain, ChromaDB, and Streamlit — the same architecture used in enterprise tools like Microsoft Copilot and SAP Joule.
@@ -43,7 +53,7 @@ User Question → Embedding → Similar Chunks Retrieved
 
 **1. Clone the repo**
 ```bash
-git clone https://github.com/your-username/rag-pdf-chatbot.git
+git clone https://github.com/sanjana231100/rag-pdf-chatbot.git
 cd rag-pdf-chatbot
 ```
 
