@@ -1,18 +1,40 @@
 import streamlit as st
-import tempfile
 import os
 from src.ingest import load_and_split_pdf
 from src.vectorstore import build_vectorstore
-from src.rag_chain import build_rag_chain, ask
+from src.rag_chain import build_rag_chain, ask, store
 
 st.set_page_config(
     page_title="PDF Chatbot",
-    page_icon="docs",
+    page_icon="📄",
     layout="wide"
 )
 
-st.title("PDF Chatbot")
+st.title("📄 PDF Chatbot")
 st.caption("Upload a PDF and ask questions about it in natural language.")
+
+
+def render_sources(sources):
+    """Render source documents in a clean expander."""
+    if not sources:
+        return
+    seen = set()
+    unique_sources = []
+    for doc in sources:
+        key = (doc.metadata.get("source"), doc.metadata.get("page"), doc.page_content[:50])
+        if key not in seen:
+            seen.add(key)
+            unique_sources.append(doc)
+
+    with st.expander(f"Sources ({len(unique_sources)} chunks used)"):
+        for i, doc in enumerate(unique_sources):
+            source = os.path.basename(doc.metadata.get("source", "unknown"))
+            page = doc.metadata.get("page", "?")
+            st.markdown(f"**{source} — page {page}**")
+            st.caption(doc.page_content[:350] + "...")
+            if i < len(unique_sources) - 1:
+                st.divider()
+
 
 with st.sidebar:
     st.header("Upload your document")
@@ -47,18 +69,23 @@ with st.sidebar:
             st.session_state.messages = []
             st.session_state.source_history = []
 
+            if uploaded_file.name in store:
+                del store[uploaded_file.name]
+
             st.success(f"Ready! {len(chunks)} chunks indexed.")
-            st.info(f"File: {uploaded_file.name}")
 
     if "chunks" in st.session_state:
         st.divider()
         st.metric("Chunks indexed", len(st.session_state.chunks))
-        st.metric("File", st.session_state.processed_file)
+        st.caption(f"File: {st.session_state.processed_file}")
 
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
         st.session_state.messages = []
         st.session_state.source_history = []
+        if "processed_file" in st.session_state:
+            if st.session_state.processed_file in store:
+                del store[st.session_state.processed_file]
         st.rerun()
 
 if "messages" not in st.session_state:
@@ -68,23 +95,16 @@ if "source_history" not in st.session_state:
     st.session_state.source_history = []
 
 if "chain" not in st.session_state:
-    st.info("Upload a PDF in the sidebar to get started.")
+    st.info("👈 Upload a PDF in the sidebar to get started.")
     st.stop()
 
 for i, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         st.write(message["content"])
-
-        if message["role"] == "assistant" and i // 2 < len(st.session_state.source_history):
-            sources = st.session_state.source_history[i // 2]
-            if sources:
-                with st.expander("Sources"):
-                    for doc in sources:
-                        source = doc.metadata.get("source", "unknown")
-                        page = doc.metadata.get("page", "?")
-                        st.caption(f"{os.path.basename(source)} — page {page}")
-                        st.write(doc.page_content[:300] + "...")
-                        st.divider()
+        if message["role"] == "assistant":
+            source_index = i // 2
+            if source_index < len(st.session_state.source_history):
+                render_sources(st.session_state.source_history[source_index])
 
 if question := st.chat_input("Ask something about your document..."):
 
@@ -104,15 +124,7 @@ if question := st.chat_input("Ask something about your document..."):
         sources = result["source_documents"]
 
         st.write(answer)
-
-        if sources:
-            with st.expander("Sources"):
-                for doc in sources:
-                    source = doc.metadata.get("source", "unknown")
-                    page = doc.metadata.get("page", "?")
-                    st.caption(f"{os.path.basename(source)} — page {page}")
-                    st.write(doc.page_content[:300] + "...")
-                    st.divider()
+        render_sources(sources)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
     st.session_state.source_history.append(sources)
