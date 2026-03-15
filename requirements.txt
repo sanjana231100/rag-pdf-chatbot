@@ -2,11 +2,13 @@ langchain
 langchain-community
 langchain-chroma
 langchain-huggingface
+langchain-core
+langchain-groq
+langchain-text-splitters
+langgraph
 chromadb
 sentence-transformers
 streamlit
 python-dotenv
 pypdf
 groq
-langchain-groq
-langchain-text-splitters
