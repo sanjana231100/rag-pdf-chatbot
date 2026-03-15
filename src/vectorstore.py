@@ -1,7 +1,7 @@
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
-CHROMA_DIR = "./chroma_db"
+CHROMA_DIR = "/home/user/chroma_db"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 
