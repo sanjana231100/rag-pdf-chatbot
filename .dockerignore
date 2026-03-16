@@ -1,0 +1,6 @@
+chroma_db/
+.env
+data/*.pdf
+__pycache__/
+*.pyc
+.git/
