@@ -9,6 +9,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.documents import Document
 from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from src.hybrid_retriever import hybrid_search, build_bm25_index
+from src.reranker import rerank
 from dotenv import load_dotenv
 from typing import List
 import os
@@ -47,13 +48,15 @@ class HybridRetriever(BaseRetriever):
         *,
         run_manager: CallbackManagerForRetrieverRun = None
     ) -> List[Document]:
-        return hybrid_search(
+        candidates = hybrid_search(
             self.vectorstore,
             self.bm25_index,
             self.chunks,
             query,
-            top_n=self.top_n
+            top_n=20
         )
+        reranked = rerank(query, candidates, top_k=5)
+        return reranked
 
 
 def build_rag_chain(vectorstore, chunks):
