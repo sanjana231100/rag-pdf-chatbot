@@ -13,3 +13,7 @@ streamlit
 python-dotenv
 pypdf
 groq
+rank-bm25
+fastapi
+uvicorn
+httpx
