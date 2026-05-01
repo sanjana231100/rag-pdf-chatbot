@@ -5,7 +5,12 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_classic.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.retrievers import BaseRetriever
+from langchain_core.documents import Document
+from langchain_core.callbacks import CallbackManagerForRetrieverRun
+from src.hybrid_retriever import hybrid_search, build_bm25_index
 from dotenv import load_dotenv
+from typing import List
 import os
 
 load_dotenv()
@@ -21,12 +26,43 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     return store[session_id]
 
 
-def build_rag_chain(vectorstore):
+class HybridRetriever(BaseRetriever):
     """
-    Build a conversational RAG chain using LangChain v1.x LCEL style.
+    LangChain-compatible retriever that wraps our hybrid search.
+    This lets us plug hybrid search into LangChain chains
+    the same way as a standard vectorstore retriever.
+    """
+
+    vectorstore: object
+    bm25_index: object
+    chunks: List[Document]
+    top_n: int = 20
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def _get_relevant_documents(
+        self,
+        query: str,
+        *,
+        run_manager: CallbackManagerForRetrieverRun = None
+    ) -> List[Document]:
+        return hybrid_search(
+            self.vectorstore,
+            self.bm25_index,
+            self.chunks,
+            query,
+            top_n=self.top_n
+        )
+
+
+def build_rag_chain(vectorstore, chunks):
+    """
+    Build a conversational RAG chain using hybrid retrieval.
 
     Args:
-        vectorstore: a Chroma vectorstore object from vectorstore.py
+        vectorstore : Chroma vectorstore object from vectorstore.py
+        chunks      : list of Document objects (needed for BM25 index)
 
     Returns:
         a RunnableWithMessageHistory chain ready to answer questions
@@ -38,8 +74,13 @@ def build_rag_chain(vectorstore):
         api_key=os.getenv("GROQ_API_KEY")
     )
 
-    retriever = vectorstore.as_retriever(
-        search_kwargs={"k": 4}
+    bm25_index = build_bm25_index(chunks)
+
+    retriever = HybridRetriever(
+        vectorstore=vectorstore,
+        bm25_index=bm25_index,
+        chunks=chunks,
+        top_n=20
     )
 
     contextualize_prompt = ChatPromptTemplate.from_messages([
@@ -91,7 +132,7 @@ def ask(chain, question, session_id="default"):
     Args:
         chain      : the chain from build_rag_chain()
         question   : the user's question as a plain string
-        session_id : unique ID per conversation (default is fine for single-user app)
+        session_id : unique ID per conversation
 
     Returns:
         dict with keys:

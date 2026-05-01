@@ -15,7 +15,6 @@ st.caption("Upload a PDF and ask questions about it in natural language.")
 
 
 def render_sources(sources):
-    """Render source documents in a clean expander."""
     if not sources:
         return
     seen = set()
@@ -57,12 +56,15 @@ with st.sidebar:
                     st.error(str(e))
                     st.stop()
 
-            with st.spinner("Building vector store (first run downloads model ~80MB)..."):
+            with st.spinner("Building vector store and BM25 index..."):
                 vectorstore = build_vectorstore(st.session_state.chunks)
                 st.session_state.vectorstore = vectorstore
 
-            with st.spinner("Initialising RAG chain..."):
-                chain = build_rag_chain(st.session_state.vectorstore)
+            with st.spinner("Initialising hybrid RAG chain..."):
+                chain = build_rag_chain(
+                    st.session_state.vectorstore,
+                    st.session_state.chunks
+                )
                 st.session_state.chain = chain
 
             st.session_state.processed_file = uploaded_file.name
@@ -78,6 +80,7 @@ with st.sidebar:
         st.divider()
         st.metric("Chunks indexed", len(st.session_state.chunks))
         st.caption(f"File: {st.session_state.processed_file}")
+        st.caption("🔍 Hybrid search: semantic + BM25")
 
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
