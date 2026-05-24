@@ -3,6 +3,7 @@ import os
 from src.ingest import load_and_split_pdf
 from src.vectorstore import build_vectorstore
 from src.rag_chain import build_rag_chain, ask, store
+from src.confidence import score_retrieval_confidence, should_fallback, build_fallback_response
 
 st.set_page_config(
     page_title="PDF Chatbot",
@@ -117,16 +118,30 @@ if question := st.chat_input("Ask something about your document..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            result = ask(
-                st.session_state.chain,
-                question,
-                session_id=st.session_state.processed_file
+            confidence = score_retrieval_confidence(
+                st.session_state.vectorstore,
+                question
             )
 
+            if should_fallback(confidence):
+                result = build_fallback_response(question, confidence)
+            else:
+                result = ask(
+                    st.session_state.chain,
+                    question,
+                    session_id=st.session_state.processed_file
+                )
+                result["confidence"] = confidence
+
         answer = result["answer"]
-        sources = result["source_documents"]
+        sources = result.get("source_documents", [])
 
         st.write(answer)
+
+        confidence_val = result.get("confidence", confidence)
+        confidence_color = "green" if confidence_val >= 0.75 else "orange" if confidence_val >= 0.60 else "red"
+        st.caption(f":{confidence_color}[Retrieval confidence: {confidence_val:.0%}]")
+
         render_sources(sources)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
