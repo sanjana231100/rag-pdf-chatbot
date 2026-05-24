@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from src.ingest import load_and_split_pdf
-from src.vectorstore import build_vectorstore
+from src.vectorstore import build_vectorstore, load_knowledge_base
 from src.rag_chain import build_rag_chain, ask, store
 from src.confidence import score_retrieval_confidence, should_fallback, build_fallback_response
 from src.citation_verifier import verify_sources
@@ -47,53 +47,106 @@ def render_sources(sources, unverified=None):
 
 
 with st.sidebar:
-    st.header("Upload your document")
-
-    uploaded_file = st.file_uploader(
-        "Choose a PDF file",
-        type="pdf",
-        help="Text-based PDFs only. Scanned documents are not supported."
+    st.header("Mode")
+    mode = st.radio(
+        "Select mode",
+        ["📄 Personal document", "🏢 Knowledge base"],
+        label_visibility="collapsed"
     )
 
-    if uploaded_file is not None:
-        if "processed_file" not in st.session_state or \
-                st.session_state.processed_file != uploaded_file.name:
+    st.divider()
 
-            with st.spinner("Reading and chunking PDF..."):
-                try:
-                    chunks = load_and_split_pdf(uploaded_file)
-                    st.session_state.chunks = chunks
-                except ValueError as e:
-                    st.error(str(e))
-                    st.stop()
+    if mode == "📄 Personal document":
+        st.header("Upload your document")
+        uploaded_file = st.file_uploader(
+            "Choose a PDF file",
+            type="pdf",
+            help="Text-based PDFs only. Scanned documents are not supported."
+        )
 
-            with st.spinner("Building vector store and BM25 index..."):
-                vectorstore = build_vectorstore(st.session_state.chunks)
-                st.session_state.vectorstore = vectorstore
+        if uploaded_file is not None:
+            if "processed_file" not in st.session_state or \
+                    st.session_state.processed_file != uploaded_file.name or \
+                    st.session_state.get("mode") != "personal":
 
-            with st.spinner("Initialising hybrid RAG chain..."):
-                chain = build_rag_chain(
-                    st.session_state.vectorstore,
-                    st.session_state.chunks
+                with st.spinner("Reading and chunking PDF..."):
+                    try:
+                        chunks = load_and_split_pdf(uploaded_file)
+                        st.session_state.chunks = chunks
+                    except ValueError as e:
+                        st.error(str(e))
+                        st.stop()
+
+                with st.spinner("Building vector store and BM25 index..."):
+                    vectorstore = build_vectorstore(st.session_state.chunks)
+                    st.session_state.vectorstore = vectorstore
+
+                with st.spinner("Initialising hybrid RAG chain..."):
+                    chain = build_rag_chain(
+                        st.session_state.vectorstore,
+                        st.session_state.chunks
+                    )
+                    st.session_state.chain = chain
+
+                st.session_state.processed_file = uploaded_file.name
+                st.session_state.messages = []
+                st.session_state.source_history = []
+                st.session_state.mode = "personal"
+
+                if uploaded_file.name in store:
+                    del store[uploaded_file.name]
+
+                st.success(f"Ready! {len(chunks)} chunks indexed.")
+
+        if "chunks" in st.session_state and st.session_state.get("mode") == "personal":
+            st.divider()
+            st.metric("Chunks indexed", len(st.session_state.chunks))
+            st.caption(f"File: {st.session_state.processed_file}")
+
+    else:
+        st.header("Knowledge base")
+
+        if "kb_loaded" not in st.session_state or not st.session_state.kb_loaded or \
+                st.session_state.get("mode") != "kb":
+
+            with st.spinner("Loading knowledge base..."):
+                kb_vectorstore = load_knowledge_base()
+
+            if kb_vectorstore is None:
+                st.error("Knowledge base not found.")
+                st.info(
+                    "Run the seed script first:\n\n"
+                    "```\npython scripts/seed_knowledge_base.py\n```\n\n"
+                    "Add PDFs to `data/knowledge_base/` before running."
                 )
-                st.session_state.chain = chain
+                st.stop()
+            else:
+                kb_chunks = kb_vectorstore.get()
+                from langchain_core.documents import Document
+                chunks = [
+                    Document(page_content=pc, metadata=meta)
+                    for pc, meta in zip(
+                        kb_chunks["documents"],
+                        kb_chunks["metadatas"]
+                    )
+                ]
+                st.session_state.vectorstore = kb_vectorstore
+                st.session_state.chunks = chunks
+                st.session_state.chain = build_rag_chain(kb_vectorstore, chunks)
+                st.session_state.processed_file = "knowledge_base"
+                st.session_state.messages = []
+                st.session_state.source_history = []
+                st.session_state.kb_loaded = True
+                st.session_state.mode = "kb"
+                st.success(f"Knowledge base loaded — {len(chunks)} chunks ready.")
 
-            st.session_state.processed_file = uploaded_file.name
-            st.session_state.messages = []
-            st.session_state.source_history = []
+        if st.session_state.get("kb_loaded"):
+            st.caption(f"Chunks: {len(st.session_state.chunks)}")
 
-            if uploaded_file.name in store:
-                del store[uploaded_file.name]
-
-            st.success(f"Ready! {len(chunks)} chunks indexed.")
-
-    if "chunks" in st.session_state:
-        st.divider()
-        st.metric("Chunks indexed", len(st.session_state.chunks))
-        st.caption(f"File: {st.session_state.processed_file}")
-        st.caption("🔍 Hybrid search: semantic + BM25")
-        st.caption("🎯 Two-stage reranking: cross-encoder")
-        st.caption("✅ Citation verification: LLM-as-judge")
+    st.divider()
+    st.caption("🔍 Hybrid search: semantic + BM25")
+    st.caption("🎯 Two-stage reranking: cross-encoder")
+    st.caption("✅ Citation verification: LLM-as-judge")
 
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
@@ -111,7 +164,10 @@ if "source_history" not in st.session_state:
     st.session_state.source_history = []
 
 if "chain" not in st.session_state:
-    st.info("👈 Upload a PDF in the sidebar to get started.")
+    if mode == "📄 Personal document":
+        st.info("👈 Upload a PDF in the sidebar to get started.")
+    else:
+        st.info("👈 Loading knowledge base...")
     st.stop()
 
 for i, message in enumerate(st.session_state.messages):
@@ -126,7 +182,7 @@ for i, message in enumerate(st.session_state.messages):
                     entry.get("unverified", [])
                 )
 
-if question := st.chat_input("Ask something about your document..."):
+if question := st.chat_input("Ask something..."):
 
     st.session_state.messages.append({"role": "user", "content": question})
     with st.chat_message("user"):

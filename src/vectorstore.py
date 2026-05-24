@@ -1,10 +1,12 @@
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
-
 import tempfile
 import os
+
 CHROMA_DIR = os.path.join(tempfile.gettempdir(), "chroma_db")
+KB_CHROMA_DIR = os.path.join(tempfile.gettempdir(), "chroma_kb")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+KB_COLLECTION = "knowledge_base"
 
 
 def get_embedder():
@@ -21,54 +23,43 @@ def get_embedder():
 
 def build_vectorstore(chunks):
     """
-    Take a list of Document chunks, embed them, and store in ChromaDB.
-
-    Args:
-        chunks: list of Document objects from ingest.py
-
-    Returns:
-        a Chroma vectorstore object ready for similarity search
+    Build a ChromaDB vectorstore from a list of Document chunks.
+    Used for personal document mode (user uploads a PDF).
     """
     embedder = get_embedder()
-
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embedder,
         persist_directory=CHROMA_DIR
     )
-
     return vectorstore
 
 
-def load_vectorstore():
+def load_knowledge_base():
     """
-    Load an existing ChromaDB from disk (if already built).
-    Use this to avoid re-embedding on every app restart.
-
-    Returns:
-        a Chroma vectorstore object
+    Load the pre-indexed knowledge base ChromaDB collection.
+    Returns None if the knowledge base hasn't been seeded yet.
     """
-    embedder = get_embedder()
+    if not os.path.exists(KB_CHROMA_DIR):
+        return None
 
-    vectorstore = Chroma(
-        persist_directory=CHROMA_DIR,
-        embedding_function=embedder
-    )
-
-    return vectorstore
+    try:
+        embedder = get_embedder()
+        vectorstore = Chroma(
+            collection_name=KB_COLLECTION,
+            embedding_function=embedder,
+            persist_directory=KB_CHROMA_DIR
+        )
+        count = vectorstore._collection.count()
+        if count == 0:
+            return None
+        return vectorstore
+    except Exception:
+        return None
 
 
 def search(vectorstore, query, k=4):
     """
     Run a similarity search and return the top-k most relevant chunks.
-
-    Args:
-        vectorstore : the Chroma vectorstore object
-        query       : the user's question as a plain string
-        k           : number of chunks to retrieve (default 4)
-
-    Returns:
-        list of Document objects (each has .page_content and .metadata)
     """
-    results = vectorstore.similarity_search(query, k=k)
-    return results
+    return vectorstore.similarity_search(query, k=k)
