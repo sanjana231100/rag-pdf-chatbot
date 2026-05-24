@@ -1,0 +1,352 @@
+[
+  {
+    "id": 1,
+    "question": "How many days of paid annual leave are full-time employees entitled to?",
+    "golden_answer": "20 days per calendar year",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 2,
+    "question": "How many days in advance must leave be approved?",
+    "golden_answer": "5 business days in advance",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 3,
+    "question": "How many unused leave days can be carried forward to the next year?",
+    "golden_answer": "Up to 10 days",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 4,
+    "question": "How many sick leave days are provided per year?",
+    "golden_answer": "10 days per year",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 5,
+    "question": "When is a medical certificate required for sick leave?",
+    "golden_answer": "When sick leave exceeds 3 consecutive days",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 6,
+    "question": "Can sick leave be carried forward to the next year?",
+    "golden_answer": "No, sick leave cannot be carried forward",
+    "source_section": "1. Leave Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 7,
+    "question": "What is the standard working week in hours?",
+    "golden_answer": "40 hours, Monday through Friday",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 8,
+    "question": "What is the overtime pay rate?",
+    "golden_answer": "1.5 times the base hourly rate",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 9,
+    "question": "After how many hours per week does overtime apply?",
+    "golden_answer": "Beyond 40 hours per week",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 10,
+    "question": "When are annual salary reviews conducted?",
+    "golden_answer": "Every January",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 11,
+    "question": "What percentage of base salary does the company contribute to the provident fund?",
+    "golden_answer": "5%",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 12,
+    "question": "How many days per week can employees work remotely?",
+    "golden_answer": "Up to 2 days per week",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 13,
+    "question": "During what period are new employees not permitted to work remotely?",
+    "golden_answer": "The first 3 months of employment",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 14,
+    "question": "What are the core working hours for remote employees?",
+    "golden_answer": "10am to 4pm in their local timezone",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 15,
+    "question": "What percentage of the insurance premium does the company cover?",
+    "golden_answer": "80%",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 16,
+    "question": "What is the annual wellness reimbursement amount?",
+    "golden_answer": "Up to $500 per year",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 17,
+    "question": "Within how many days must wellness reimbursement claims be submitted?",
+    "golden_answer": "Within 90 days of the expense",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 18,
+    "question": "How many dependents are covered under the medical insurance?",
+    "golden_answer": "Up to 3 dependents",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 19,
+    "question": "What notice period is required for employees who want to resign?",
+    "golden_answer": "A minimum of 2 weeks written notice",
+    "source_section": "6. Termination and Notice",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 20,
+    "question": "What notice period is required for senior or managerial roles?",
+    "golden_answer": "4 weeks notice",
+    "source_section": "6. Termination and Notice",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 21,
+    "question": "Within how many days must company property be returned after termination?",
+    "golden_answer": "Within 2 business days",
+    "source_section": "6. Termination and Notice",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 22,
+    "question": "Is dental coverage included in the medical plan?",
+    "golden_answer": "Yes, dental and vision coverage is included at no additional cost",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 23,
+    "question": "What expenses qualify for the wellness reimbursement?",
+    "golden_answer": "Gym memberships, fitness equipment, or mental health services",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 24,
+    "question": "What happens if an employee violates the confidentiality policy?",
+    "golden_answer": "It is grounds for disciplinary action including termination",
+    "source_section": "4. Code of Conduct",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 25,
+    "question": "Within how many days must conflicts of interest be declared to HR?",
+    "golden_answer": "Within 5 business days of becoming aware of them",
+    "source_section": "4. Code of Conduct",
+    "difficulty": "straightforward"
+  },
+  {
+    "id": 26,
+    "question": "If I worked 45 hours this week, how many overtime hours do I have?",
+    "golden_answer": "5 overtime hours, compensated at 1.5 times the base hourly rate",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 27,
+    "question": "I joined 2 months ago. Can I work from home tomorrow?",
+    "golden_answer": "No, remote work is not permitted during the first 3 months of employment",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 28,
+    "question": "I want to take 15 days of leave this year and carry the rest. How many days can I carry forward?",
+    "golden_answer": "You can carry forward up to 10 unused days, so with 15 days taken out of 20, you have 5 days remaining to carry forward",
+    "source_section": "1. Leave Policy",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 29,
+    "question": "My manager approved my remote work. What time do I need to be online?",
+    "golden_answer": "You must be available during core hours of 10am to 4pm in your local timezone",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 30,
+    "question": "I have been sick for 4 days. What documentation do I need?",
+    "golden_answer": "A medical certificate is required since the sick leave exceeds 3 consecutive days",
+    "source_section": "1. Leave Policy",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 31,
+    "question": "How much will I pay monthly for insurance if my premium is $500?",
+    "golden_answer": "You pay 20% of the premium, which would be $100 per month through payroll deduction",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 32,
+    "question": "I am a manager and want to resign. When should I give notice?",
+    "golden_answer": "Senior and managerial roles are required to provide 4 weeks written notice",
+    "source_section": "6. Termination and Notice",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 33,
+    "question": "Can I share project details with a partner company without approval?",
+    "golden_answer": "No, confidential company information must not be shared with external parties without written authorization from the Legal department",
+    "source_section": "4. Code of Conduct",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 34,
+    "question": "I bought a gym membership for $600. How much can I claim?",
+    "golden_answer": "You can claim up to $500 per year as that is the maximum wellness reimbursement amount",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 35,
+    "question": "When will my performance-based salary increase take effect?",
+    "golden_answer": "Annual salary reviews are conducted every January based on performance ratings from the preceding year",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "multi_hop"
+  },
+  {
+    "id": 36,
+    "question": "What is the company's stock price?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 37,
+    "question": "Who is the CEO of TechCorp?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 38,
+    "question": "What is the company address?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 39,
+    "question": "How many employees does TechCorp have?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 40,
+    "question": "What is the company's revenue?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 41,
+    "question": "Does the policy cover maternity leave?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 42,
+    "question": "What is the process for requesting a salary raise outside of the review cycle?",
+    "golden_answer": "I could not find that information in the document",
+    "source_section": "none",
+    "difficulty": "no_answer"
+  },
+  {
+    "id": 43,
+    "question": "time off",
+    "golden_answer": "Employees are entitled to 20 days of paid annual leave per calendar year",
+    "source_section": "1. Leave Policy",
+    "difficulty": "ambiguous"
+  },
+  {
+    "id": 44,
+    "question": "pay",
+    "golden_answer": "The document covers overtime pay at 1.5 times base rate and annual salary reviews every January",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "ambiguous"
+  },
+  {
+    "id": 45,
+    "question": "working from home rules",
+    "golden_answer": "Employees may work remotely up to 2 days per week subject to manager approval",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "ambiguous"
+  },
+  {
+    "id": 46,
+    "question": "benefits",
+    "golden_answer": "TechCorp provides medical insurance covering employee and up to 3 dependents with 80% company coverage, plus $500 annual wellness reimbursement",
+    "source_section": "5. Health and Benefits",
+    "difficulty": "ambiguous"
+  },
+  {
+    "id": 47,
+    "question": "leaving the company",
+    "golden_answer": "Employees must provide minimum 2 weeks written notice, or 4 weeks for senior roles",
+    "source_section": "6. Termination and Notice",
+    "difficulty": "ambiguous"
+  },
+  {
+    "id": 48,
+    "question": "Is overtime paid at double the rate?",
+    "golden_answer": "No, overtime is compensated at 1.5 times the base hourly rate, not double",
+    "source_section": "2. Compensation and Overtime",
+    "difficulty": "misconception"
+  },
+  {
+    "id": 49,
+    "question": "Can I carry forward all my unused leave days?",
+    "golden_answer": "No, unused leave can only be carried forward up to a maximum of 10 days",
+    "source_section": "1. Leave Policy",
+    "difficulty": "misconception"
+  },
+  {
+    "id": 50,
+    "question": "Is remote work available from day one of employment?",
+    "golden_answer": "No, remote work is not permitted during the first 3 months of employment",
+    "source_section": "3. Remote Work Policy",
+    "difficulty": "misconception"
+  }
+]

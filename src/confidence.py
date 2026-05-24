@@ -1,8 +1,7 @@
 from langchain_core.documents import Document
 from typing import List, Dict
 
-
-CONFIDENCE_THRESHOLD = 0.60
+CONFIDENCE_THRESHOLD = 0.20
 
 
 def score_retrieval_confidence(
@@ -14,16 +13,12 @@ def score_retrieval_confidence(
     Score how confident we are that the vectorstore contains
     a good answer to this query.
 
-    Uses cosine similarity scores from ChromaDB's similarity_search_with_score.
-    Returns the average of the top-k similarity scores, normalised to 0-1.
+    ChromaDB with cosine distance returns scores where:
+    - 0.0 = identical (best match)
+    - 2.0 = completely opposite (worst match)
+    - Typical good matches score between 0.2 and 0.8
 
-    Args:
-        vectorstore : Chroma vectorstore object
-        query       : the user's question
-        top_k       : number of chunks to score against
-
-    Returns:
-        float between 0 and 1 — higher means more confident
+    We normalise to 0-1 where 1 = most confident.
     """
     try:
         results_with_scores = vectorstore.similarity_search_with_score(query, k=top_k)
@@ -32,8 +27,8 @@ def score_retrieval_confidence(
             return 0.0
 
         scores = []
-        for _, score in results_with_scores:
-            normalised = max(0.0, min(1.0, 1.0 - score))
+        for _, distance in results_with_scores:
+            normalised = max(0.0, min(1.0, 1.0 - (distance / 2.0)))
             scores.append(normalised)
 
         return round(sum(scores) / len(scores), 3)
@@ -45,15 +40,6 @@ def score_retrieval_confidence(
 def build_fallback_response(query: str, confidence: float) -> Dict:
     """
     Build a structured fallback response when confidence is too low.
-    Returns this instead of calling the LLM to avoid hallucination.
-
-    Args:
-        query      : the user's original question
-        confidence : the retrieval confidence score
-
-    Returns:
-        dict with "answer" and "source_documents" keys
-        matching the format of a normal ask() response
     """
     answer = (
         f"I couldn't find relevant information about this in the uploaded document "
@@ -73,11 +59,5 @@ def build_fallback_response(query: str, confidence: float) -> Dict:
 def should_fallback(confidence: float) -> bool:
     """
     Decide whether to skip the LLM and return a fallback response.
-
-    Args:
-        confidence : retrieval confidence score from score_retrieval_confidence()
-
-    Returns:
-        True if confidence is below threshold and we should not call the LLM
     """
     return confidence < CONFIDENCE_THRESHOLD
