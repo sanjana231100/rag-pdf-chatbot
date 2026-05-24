@@ -4,6 +4,7 @@ from src.ingest import load_and_split_pdf
 from src.vectorstore import build_vectorstore
 from src.rag_chain import build_rag_chain, ask, store
 from src.confidence import score_retrieval_confidence, should_fallback, build_fallback_response
+from src.citation_verifier import verify_sources
 
 st.set_page_config(
     page_title="PDF Chatbot",
@@ -15,7 +16,7 @@ st.title("📄 PDF Chatbot")
 st.caption("Upload a PDF and ask questions about it in natural language.")
 
 
-def render_sources(sources):
+def render_sources(sources, unverified=None):
     if not sources:
         return
     seen = set()
@@ -26,7 +27,7 @@ def render_sources(sources):
             seen.add(key)
             unique_sources.append(doc)
 
-    with st.expander(f"Sources ({len(unique_sources)} chunks used)"):
+    with st.expander(f"✅ Verified sources ({len(unique_sources)} chunks)"):
         for i, doc in enumerate(unique_sources):
             source = os.path.basename(doc.metadata.get("source", "unknown"))
             page = doc.metadata.get("page", "?")
@@ -34,6 +35,15 @@ def render_sources(sources):
             st.caption(doc.page_content[:350] + "...")
             if i < len(unique_sources) - 1:
                 st.divider()
+
+    if unverified:
+        with st.expander(f"⚠️ Unverified sources ({len(unverified)} chunks)"):
+            st.caption("These chunks were retrieved but may not directly support the answer.")
+            for doc in unverified:
+                source = os.path.basename(doc.metadata.get("source", "unknown"))
+                page = doc.metadata.get("page", "?")
+                st.markdown(f"**{source} — page {page}**")
+                st.caption(doc.page_content[:200] + "...")
 
 
 with st.sidebar:
@@ -82,6 +92,8 @@ with st.sidebar:
         st.metric("Chunks indexed", len(st.session_state.chunks))
         st.caption(f"File: {st.session_state.processed_file}")
         st.caption("🔍 Hybrid search: semantic + BM25")
+        st.caption("🎯 Two-stage reranking: cross-encoder")
+        st.caption("✅ Citation verification: LLM-as-judge")
 
     st.divider()
     if st.button("Clear conversation", use_container_width=True):
@@ -108,7 +120,11 @@ for i, message in enumerate(st.session_state.messages):
         if message["role"] == "assistant":
             source_index = i // 2
             if source_index < len(st.session_state.source_history):
-                render_sources(st.session_state.source_history[source_index])
+                entry = st.session_state.source_history[source_index]
+                render_sources(
+                    entry.get("verified", []),
+                    entry.get("unverified", [])
+                )
 
 if question := st.chat_input("Ask something about your document..."):
 
@@ -125,6 +141,8 @@ if question := st.chat_input("Ask something about your document..."):
 
             if should_fallback(confidence):
                 result = build_fallback_response(question, confidence)
+                verified_sources = []
+                unverified_sources = []
             else:
                 result = ask(
                     st.session_state.chain,
@@ -133,16 +151,26 @@ if question := st.chat_input("Ask something about your document..."):
                 )
                 result["confidence"] = confidence
 
+                with st.spinner("Verifying citations..."):
+                    verification = verify_sources(
+                        result["answer"],
+                        result["source_documents"]
+                    )
+                verified_sources = verification["verified_sources"]
+                unverified_sources = verification["unverified_sources"]
+
         answer = result["answer"]
-        sources = result.get("source_documents", [])
+        confidence_val = result.get("confidence", confidence)
 
         st.write(answer)
 
-        confidence_val = result.get("confidence", confidence)
         confidence_color = "green" if confidence_val >= 0.75 else "orange" if confidence_val >= 0.60 else "red"
         st.caption(f":{confidence_color}[Retrieval confidence: {confidence_val:.0%}]")
 
-        render_sources(sources)
+        render_sources(verified_sources, unverified_sources)
 
     st.session_state.messages.append({"role": "assistant", "content": answer})
-    st.session_state.source_history.append(sources)
+    st.session_state.source_history.append({
+        "verified": verified_sources,
+        "unverified": unverified_sources
+    })
